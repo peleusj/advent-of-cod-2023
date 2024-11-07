@@ -7,10 +7,10 @@ with open(sys.argv[1]) as file:
 p1 = 0
 p2 = 0
 
-bag = {"red": 12, "green": 13, "blue": 14}
+p1_bag = {"red": 12, "green": 13, "blue": 14}
 
 
-def trans(line):
+def parse(line):
     """
     input:
         "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
@@ -27,21 +27,21 @@ def trans(line):
     return result
 
 
-t_lines = [trans(line) for line in lines]
+t_lines = [parse(line) for line in lines]
 
 for index, line in enumerate(t_lines):
     possibility = True
-    least_quantity = {"red": 0, "green": 0, "blue": 0}
+    p2_bag = {"red": 0, "green": 0, "blue": 0}
     for round in line:
         for color, quantity in round.items():
-            if quantity > bag[color]:
+            if quantity > p1_bag[color]:
                 possibility = False
-            if quantity > least_quantity[color]:
-                least_quantity[color] = quantity
+            if quantity > p2_bag[color]:
+                p2_bag[color] = quantity
     if possibility:
         p1 += index + 1
 
-    p2 += math.prod(least_quantity.values())
+    p2 += math.prod(p2_bag.values())
 
 print(f"Part 1: {p1}")
 print(f"Part 2: {p2}")

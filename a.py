@@ -1,7 +1,7 @@
 import sys
 
 with open(sys.argv[1]) as file:
-    lines = file.readlines()
+    lines = file.read().splitlines()
 
 p1 = 0
 p2 = 0

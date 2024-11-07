@@ -1,50 +1,49 @@
 import sys
-import string
-import re
 
 with open(sys.argv[1]) as file:
-    lines = file.read().strip().split("\n")
+    lines = file.read().splitlines()
 
 p1 = 0
 p2 = 0
 
-punctuations = string.punctuation.replace(".", "")
-pattern = r"\d+"
-lens = len(lines)
+row_len = len(lines)
+col_len = len(lines[0])
 
-for index, line in enumerate(lines):
-    line_pre = lines[index - 1] if index > 0 else None
-    line_after = lines[index + 1] if index < lens - 1 else None
+p1_cordinates = set()
 
-    matches = re.finditer(pattern, line)
 
-    for match in matches:
-        start = int(match.start())
-        end = int(match.end())
+def parse(r, c):
+    s = ""
+    while c < col_len and lines[r][c].isdigit():
+        s += lines[r][c]
+        c += 1
+    return int(s)
 
-        if start > 0:
-            if line[start - 1] in punctuations:
-                p1 += int(match.group())
-                continue
 
-        if end < lens:
-            if line[end] in punctuations:
-                p1 += int(match.group())
-                continue
+for r, row in enumerate(lines):
+    for c, char in enumerate(row):
+        if char.isdigit() or char == ".":
+            continue
 
-        b_start = start - 1 if start > 0 else start
-        b_end = end + 1 if end < lens else end
+        p2_cordinates = set()
 
-        if line_pre:
-            for c in line_pre[b_start:b_end]:
-                if c in punctuations:
-                    p1 += int(match.group())
+        # 3x3 grid around the puncuation
+        for cr in [r - 1, r, r + 1]:
+            for cc in [c - 1, c, c + 1]:
+                if cr < 0 or cr >= row_len or cc < 0 or cc >= col_len:
                     continue
+                if lines[cr][cc].isdigit():
+                    while cc > 0 and lines[cr][cc - 1].isdigit():
+                        cc -= 1
+                    p1_cordinates.add((cr, cc))
+                    if char == "*":
+                        p2_cordinates.add((cr, cc))
 
-        if line_after:
-            for c in line_after[b_start:b_end]:
-                if c in punctuations:
-                    p1 += int(match.group())
+        if len(p2_cordinates) == 2:
+            nums = [parse(r, c) for r, c in p2_cordinates]
+            p2 += nums[0] * nums[1]
+
+p1 = sum(parse(r, c) for r, c in p1_cordinates)
 
 print(f"Part 1: {p1}")
 print(f"Part 2: {p2}")

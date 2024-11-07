@@ -2,15 +2,15 @@ import math
 import sys
 
 with open(sys.argv[1]) as file:
-    lines = file.readlines()
+    lines = file.read().splitlines()
 
 p1 = 0
 p2 = 0
 
-cards = [1 for _ in range(len(lines))]
+p2_cards = [1 for _ in range(len(lines))]
 
 
-def check(line):
+def parse(line):
     win_numbers, numbers = line.split(":")[1].split("|")
     count = 0
     for number in numbers.strip().split():
@@ -20,14 +20,15 @@ def check(line):
 
 
 for index, line in enumerate(lines):
-    count = check(line)
+    count = parse(line)
     if count:
         p1 += int(math.pow(2, count - 1))
-        for x in range(cards[index]):
-            for y in range(index + 1, index + 1 + count):
-                cards[y] += 1
 
-p2 = sum(cards)
+        for x in range(p2_cards[index]):
+            for y in range(index + 1, index + 1 + count):
+                p2_cards[y] += 1
+
+p2 = sum(p2_cards)
 
 print(f"Part 1: {p1}")
 print(f"Part 2: {p2}")
