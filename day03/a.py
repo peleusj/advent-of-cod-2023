@@ -20,6 +20,8 @@ def parse(r, c):
     return int(s)
 
 
+# check 3x3 grid around the puncuation
+# can also check grid around digits
 for r, row in enumerate(lines):
     for c, char in enumerate(row):
         if char.isdigit() or char == ".":
@@ -27,7 +29,6 @@ for r, row in enumerate(lines):
 
         p2_cordinates = set()
 
-        # 3x3 grid around the puncuation
         for cr in [r - 1, r, r + 1]:
             for cc in [c - 1, c, c + 1]:
                 if cr < 0 or cr >= row_len or cc < 0 or cc >= col_len:
