@@ -1,61 +1,93 @@
 import sys
 
 with open(sys.argv[1]) as file:
-    lines = file.read().strip().split("\n\n")
+    lines = file.read().strip()
 
-lines = [line.split("\n") for line in lines]
-# print(lines)
-# [
-#   ['seeds: 79 14 55 13'],
-#   ['seed-to-soil map:', '50 98 2', '52 50 48'],
-#   ['soil-to-fertilizer map:', '0 15 37', '37 52 2', '39 0 15'],
-#   ['fertilizer-to-water map:', '49 53 8', '0 11 42', '42 0 7', '57 7 4'],
-#   ['water-to-light map:', '88 18 7', '18 25 70'],
-#   ['light-to-temperature map:', '45 77 23', '81 45 19', '68 64 13'],
-#   ['temperature-to-humidity map:', '0 69 1', '1 0 69'],
-#   ['humidity-to-location map:', '60 56 37', '56 93 4']
-# ]
+p1_seeds, *blocks = lines.split("\n\n")
+# print(seeds)
+# print(blocks)
 
+seeds = [int(seed) for seed in p1_seeds.split(":")[1].split()]
+# print(seeds)
+# [79, 14, 55, 13]
 
-# ['79', '14', '55', '13']
-seed_strs = lines[0][0].split(": ")[1].split()
+p1_seeds = seeds
 
-seeds = [int(seed) for seed in seed_strs]
+p2_seeds = []
+for i in range(0, len(seeds), 2):
+    p2_seeds.append((seeds[i], seeds[i] + seeds[i + 1]))
+
+# print(p2_seeds)
+# [(79, 93), (55, 68)]
 
 
-# print(parse(79, ["50 98 2", "52 50 48"]))
-def parse(source, map_strs):
-    result = source
-    for str in map_strs:
-        start_des, start_source, length = [int(x) for x in str.split()]
-        if source < start_source:
-            continue
-        elif source > (start_source + length - 1):
-            continue
-        else:
-            result = start_des + (source - start_source)
-
-    return result
+def parse(input, maps):
+    output = input
+    for map in maps:
+        des, src, length = [int(x) for x in map.split()]
+        if src <= input < src + length:
+            output = (input - src) + des
+    return output
 
 
-def parse_location(seed):
-    target = seed
-    for line in lines[1:]:
-        target = parse(target, line[1:])
-    return target
+# print(parse(79, [[50, 98, 2], [52, 50, 48]]))
+
+
+def parse_range(input, maps):
+    """
+    input: list of (start, input_end) tuple
+            # inclusive on the left, exclusive on the right
+            # e.g. [1,3) = [1,2]
+    """
+    output = []
+    for map in maps:
+        des_start, src_start, length = [int(x) for x in map.split()]
+        src_end = src_start + length
+        out_ranged = []
+        # (src_start, src_end) might cut (start,end)
+        # [start                                       end]
+        #          [src_start       src_end]
+        # [BEFORE ][INTER                  ][AFTER        ]
+        while input:
+            (start, end) = input.pop()
+
+            before = (start, min(end, src_start))
+            if before[1] > before[0]:
+                out_ranged.append(before)
+
+            inter = (max(start, src_start), min(src_end, end))
+            if inter[1] > inter[0]:
+                output.append(
+                    (inter[0] - src_start + des_start, inter[1] - src_start + des_start)
+                )
+
+            after = (max(src_end, start), end)
+            if after[1] > after[0]:
+                out_ranged.append(after)
+        input = out_ranged
+    return output + input
 
 
 p1 = float("inf")
 p2 = float("inf")
 
-for seed in seeds:
-    p1 = min(p1, parse_location(seed))
+for seed in p1_seeds:
+    target = seed
+    for block in blocks:
+        # ["50 98 2", "52 50 48"]
+        maps = block.split("\n")[1:]
+        target = parse(target, maps)
+    p1 = min(p1, target)
 
-p2_seeds_start = seeds[::2]
-p2_seeds_length = seeds[1::2]
-for i in range(len(p2_seeds_length)):
-    for seed in range(p2_seeds_start[i], p2_seeds_start[i] + p2_seeds_length[i]):
-        p2 = min(p2, parse_location(seed))
+p2_locations = []
+for seed in p2_seeds:
+    target = [seed]
+    for block in blocks:
+        maps = block.split("\n")[1:]
+        target = parse_range(target, maps)
+    p2_locations.append(min(target)[0])
+
+p2 = min(p2_locations)
 
 
 print(f"Part 1: {p1}")
