@@ -3,11 +3,21 @@ import sys
 with open(sys.argv[1]) as file:
     lines = file.read().strip()
 
-p1_seeds, *blocks = lines.split("\n\n")
+seeds, *blocks = lines.split("\n\n")
 # print(seeds)
+# seeds: 79 14 55 13
 # print(blocks)
+# [
+#     "seed-to-soil map:\n50 98 2\n52 50 48",
+#     "soil-to-fertilizer map:\n0 15 37\n37 52 2\n39 0 15",
+#     "fertilizer-to-water map:\n49 53 8\n0 11 42\n42 0 7\n57 7 4",
+#     "water-to-light map:\n88 18 7\n18 25 70",
+#     "light-to-temperature map:\n45 77 23\n81 45 19\n68 64 13",
+#     "temperature-to-humidity map:\n0 69 1\n1 0 69",
+#     "humidity-to-location map:\n60 56 37\n56 93 4",
+# ]
 
-seeds = [int(seed) for seed in p1_seeds.split(":")[1].split()]
+seeds = [int(seed) for seed in seeds.split(":")[1].split()]
 # print(seeds)
 # [79, 14, 55, 13]
 
@@ -68,16 +78,19 @@ def parse_range(input, maps):
     return output + input
 
 
-p1 = float("inf")
-p2 = float("inf")
+p1 = 0
+p2 = 0
 
+p1_locations = []
 for seed in p1_seeds:
     target = seed
     for block in blocks:
         # ["50 98 2", "52 50 48"]
         maps = block.split("\n")[1:]
         target = parse(target, maps)
-    p1 = min(p1, target)
+    p1_locations.append(target)
+
+p1 = min(p1_locations)
 
 p2_locations = []
 for seed in p2_seeds:
