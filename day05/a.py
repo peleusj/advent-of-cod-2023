@@ -1,24 +1,7 @@
 import sys
-from collections import defaultdict
 
 with open(sys.argv[1]) as file:
     lines = file.read().strip().split("\n\n")
-
-p1 = 0
-p2 = 0
-
-
-# print(source_destination_map(["50 98 2", "52 50 48"]).get(79))
-def source_destination_map(str_list):
-    result = defaultdict(int)
-    for str in str_list:
-        d_start, s_start, length = str.split()
-        d_list = [d for d in range(int(d_start), int(d_start) + int(length) + 1)]
-        s_list = [s for s in range(int(s_start), int(s_start) + int(length) + 1)]
-        for i in range(int(length)):
-            result[s_list[i]] = d_list[i]
-    return result
-
 
 lines = [line.split("\n") for line in lines]
 # print(lines)
@@ -33,18 +16,46 @@ lines = [line.split("\n") for line in lines]
 #   ['humidity-to-location map:', '60 56 37', '56 93 4']
 # ]
 
-seeds = lines[0][0].split(": ")[1].split()
 
-seeds_location = []
-for seed in seeds:
-    # don't forget int convert
-    target = int(seed)
+# ['79', '14', '55', '13']
+seed_strs = lines[0][0].split(": ")[1].split()
+
+seeds = [int(seed) for seed in seed_strs]
+
+
+# print(parse(79, ["50 98 2", "52 50 48"]))
+def parse(source, map_strs):
+    result = source
+    for str in map_strs:
+        start_des, start_source, length = [int(x) for x in str.split()]
+        if source < start_source:
+            continue
+        elif source > (start_source + length - 1):
+            continue
+        else:
+            result = start_des + (source - start_source)
+
+    return result
+
+
+def parse_location(seed):
+    target = seed
     for line in lines[1:]:
-        mappings = source_destination_map(line[1:])
-        target = mappings.get(target, target)
-    seeds_location.append(target)
+        target = parse(target, line[1:])
+    return target
 
-p1 = min(seeds_location)
+
+p1 = float("inf")
+p2 = float("inf")
+
+for seed in seeds:
+    p1 = min(p1, parse_location(seed))
+
+p2_seeds_start = seeds[::2]
+p2_seeds_length = seeds[1::2]
+for i in range(len(p2_seeds_length)):
+    for seed in range(p2_seeds_start[i], p2_seeds_start[i] + p2_seeds_length[i]):
+        p2 = min(p2, parse_location(seed))
 
 
 print(f"Part 1: {p1}")
