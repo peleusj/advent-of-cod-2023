@@ -1,4 +1,6 @@
 import sys
+import math
+from functools import reduce
 
 with open(sys.argv[1]) as file:
     lines = file.read().strip()
@@ -14,48 +16,61 @@ for network in networks.split("\n"):
 
 
 def reach():
-    start = "AAA"
-    end = "ZZZ"
+    start, end = "AAA", "ZZZ"
+    round, is_end = True, False
     steps = 0
-    round = 1
-    while round > 0:
+    while round:
         for instruction in instructions:
             steps += 1
             if instruction == "L":
                 next = maps[start][0]
             else:
                 next = maps[start][1]
-            start = next
-            if start == end:
+            if next == end:
+                is_end = True
                 break
-        if start == end:
+            else:
+                start = next
+        if is_end:
             break
     return steps
+
+
+def reach_z(start):
+    round, is_end = True, False
+    z_steps = []
+    steps = 0
+    while round:
+        for instruction in instructions:
+            steps += 1
+            if instruction == "L":
+                next = maps[start][0]
+            else:
+                next = maps[start][1]
+            if next.endswith("Z"):
+                z_steps.append(steps)
+                is_end = True
+                break
+            else:
+                start = next
+
+        if is_end:
+            break
+    return steps
+
+
+# print(reach_z("22A"))
+
+
+def lcm(a, b):
+    """Least Common Multiple"""
+    return abs(a * b) // math.gcd(a, b)
 
 
 def reach_simultaneously():
     starting_nodes = [node for node in maps.keys() if node.endswith("A")]
-    length = len(starting_nodes)
-    z_nodes = []
-    round = 0
-    steps = 0
-    while round >= 0:
-        for instruction in instructions:
-            steps += 1
-            if instruction == "L":
-                next_nodes = [maps[node][0] for node in starting_nodes]
-            else:
-                next_nodes = [maps[node][1] for node in starting_nodes]
-            starting_nodes = next_nodes
-            print(starting_nodes)
-            z_nodes = [node for node in starting_nodes if node.endswith("Z")]
-            if len(z_nodes) == length:
-                break
-
-        if len(z_nodes) == length:
-            break
-
-    return steps
+    z_steps = [reach_z(node) for node in starting_nodes]
+    return reduce(lcm, z_steps)
 
 
 p1 = reach()
