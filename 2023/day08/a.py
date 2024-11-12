@@ -6,49 +6,60 @@ with open(sys.argv[1]) as file:
 instructions, networks = lines.split("\n\n")
 
 
-class LR:
-    """Represent one node and its network"""
-
-    def __init__(self, left, right):
-        self.L = left
-        self.R = right
-
-    def __getitem__(self, direction):
-        if direction == "L":
-            return self.L
-        else:
-            return self.R
+maps = {}
+for network in networks.split("\n"):
+    node, neighbors = network.split(" = ")
+    left, right = neighbors[1:-1].split(", ")
+    maps[node] = (left, right)
 
 
-def parse():
-    maps = {}
-    for network in networks.split("\n"):
-        node, neighbors = network.split(" = ")
-        left, right = neighbors[1:-1].split(", ")
-        lr = LR(left, right)
-        maps[node] = lr
-    return maps
-
-
-maps = parse()
-
-start = "AAA"
-end = "ZZZ"
-steps = 0
-round = 1
-
-while round > 0:
-    for instruction in instructions:
-        steps += 1
-        next = maps[start][instruction]
-        start = next
+def reach():
+    start = "AAA"
+    end = "ZZZ"
+    steps = 0
+    round = 1
+    while round > 0:
+        for instruction in instructions:
+            steps += 1
+            if instruction == "L":
+                next = maps[start][0]
+            else:
+                next = maps[start][1]
+            start = next
+            if start == end:
+                break
         if start == end:
             break
-    if start == end:
-        break
+    return steps
 
-p1 = steps
-p2 = 0
+
+def reach_simultaneously():
+    starting_nodes = [node for node in maps.keys() if node.endswith("A")]
+    length = len(starting_nodes)
+    z_nodes = []
+    round = 0
+    steps = 0
+    while round >= 0:
+        for instruction in instructions:
+            steps += 1
+            if instruction == "L":
+                next_nodes = [maps[node][0] for node in starting_nodes]
+            else:
+                next_nodes = [maps[node][1] for node in starting_nodes]
+            starting_nodes = next_nodes
+            print(starting_nodes)
+            z_nodes = [node for node in starting_nodes if node.endswith("Z")]
+            if len(z_nodes) == length:
+                break
+
+        if len(z_nodes) == length:
+            break
+
+    return steps
+
+
+p1 = reach()
+p2 = reach_simultaneously()
 
 
 print(f"Part 1: {p1}")
