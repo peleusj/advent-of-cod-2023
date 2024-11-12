@@ -14,24 +14,11 @@ p2_distance = int("".join(distances))
 
 
 def race(time_limit, record_distance):
-    start = 0
-    end = 0
-
-    t1 = 0
-    while t1 <= time_limit:
-        if (time_limit - t1) * t1 > record_distance:
-            start = t1
-            break
-        t1 += 1
-
-    t2 = time_limit
-    while t2 >= 0:
-        if (time_limit - t2) * t2 > record_distance:
-            end = t2
-            break
-        t2 -= 1
-
-    return end - start + 1
+    result = 0
+    for t in range(time_limit + 1):
+        if (time_limit - t) * t > record_distance:
+            result += 1
+    return result
 
 
 p1 = 1
