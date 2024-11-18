@@ -7,7 +7,7 @@ with open(sys.argv[1]) as file:
 grid = lines.split("\n")
 
 galaxies = [
-    (r, c) for r, row in enumerate(grid) for c, col in enumerate(row) if col == "#"
+    (r, c) for r, row in enumerate(grid) for c, ch in enumerate(row) if ch == "#"
 ]
 
 empty_rows = [r for r, row in enumerate(grid) if all(c == "." for c in row)]
