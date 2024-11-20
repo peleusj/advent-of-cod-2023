@@ -8,10 +8,6 @@ with open(sys.argv[1]) as file:
 records = lines.split("\n")
 
 
-def get_damaged(spring):
-    return [len(match) for match in re.findall(r"#+", spring)]
-
-
 def get_combinations(position_nums, symbols=".#"):
     result = []
     for combination in itertools.product(symbols, repeat=position_nums):
@@ -24,6 +20,10 @@ def replace_unknown(original_spring, replacement):
     for char in replacement:
         new_spring = new_spring.replace("?", char, 1)
     return new_spring
+
+
+def get_damaged(spring):
+    return [len(match) for match in re.findall(r"#+", spring)]
 
 
 def get_possible_arrangements(record):
